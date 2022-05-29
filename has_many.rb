@@ -8,23 +8,21 @@ module HasMany
                          .join
     mod_name = "HasMany#{name_to_module}"
     begin
-      method_module = const_get(mod_ - name)
+      method_module = const_get(mod_name)
     rescue NameError
       method_module = Module.new
       const_get(mod_name, method_module)
-      include method_module
     end
-    line_no = __LINE__
 
-    method_defs = %{
+    include method_module
+    method_module.module_eval <<CODE, __FILE__, __LINE__ + 1
     def #{name}
-      driver.find_element(:css, '.#{name}')
+      driver.find_element(:css, "#{name}")
     end
 
     def #{name}_texts
-      #{name}.map(&:text)
+      name.map(&:text)
     end
- }
-    method_module.module_eval method_defs, __FILE__, line_no
+CODE
   end
 end
